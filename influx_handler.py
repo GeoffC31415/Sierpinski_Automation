@@ -3,7 +3,7 @@ import json
 
 
 def get_secrets():
-    with open('/home/pi/Sierpinski/secrets.json') as s:
+    with open('./data/secrets.json') as s:
         secrets = json.load(s)
     return secrets
 
