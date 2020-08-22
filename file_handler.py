@@ -76,6 +76,8 @@ def removeFiles(filelist):
     for f in filelist:
         try:
             os.remove(f)
+            if os.isfile(f + '.thumb'):
+                os.remove(f + '.thumb')
             n += 1
         except FileNotFoundError:
             print(str(time.ctime()) + '        Could not remove file ' + f)
