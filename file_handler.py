@@ -26,8 +26,8 @@ def filterT(filelist, minhr, maxhr):
     intime = []
     totalsize = 0
     for f in filelist:
-        f_hr = int(f[-10:-8])
-        if f_hr >= minhr and f_hr < maxhr:
+        filedate = dt.fromtimestamp(os.path.getmtime(f))
+        if minhr <= filedate.hour < maxhr:
             intime.append(f)
             totalsize += os.path.getsize(f)
     return set(intime), totalsize / 1024
