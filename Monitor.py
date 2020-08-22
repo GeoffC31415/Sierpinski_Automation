@@ -53,7 +53,7 @@ thermistor_volts = []
 # Initialisation
 #
 def init_calibration():
-    with open('/home/pi/Sierpinski/data/thermistor_calibration_alt.json', 'r') as f:
+    with open('./data/thermistor_calibration_alt.json', 'r') as f:
         data = json.load(f)
 
     data['temps'] = np.array(data['temps'])
@@ -100,7 +100,7 @@ def set_heater_by_time(t):
         set_heater_absolute(power)
 
     # Log values
-    log_temps(readings)
+    log_temps(readings, median_temp)
     log_fields({
         'heater_state': heater['state']['power'],
         'target_temp': target_temp,
@@ -190,9 +190,9 @@ def display_status(s):
 #
 # Logging
 #
-def log_temps(r):
+def log_temps(r, repr_temp):
     temps = {'temp' + str(i): r[i] for i in range(4)}
-    temps['temp_avg'] = sum(r) / len(r)
+    temps['temp_avg'] = repr_temp
     log_fields(temps)
 
 
