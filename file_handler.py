@@ -11,7 +11,7 @@ maxage_days = 14
 def get_mp4s():
     minage = dt.now() - td(hours=1)
     files = [
-        f for f in set(glob.glob(sourcePath + '*.mp4'))
+        f for f in set(glob.glob(sourcePath + '*/*.mp4'))
         if dt.fromtimestamp(os.path.getmtime(f)) < minage
     ]
     return set(files)
@@ -79,6 +79,8 @@ def removeFiles(filelist):
             n += 1
         except FileNotFoundError:
             print(str(time.ctime()) + '        Could not remove file ' + f)
+        except OSError:
+            print(str(time.ctime()) + '        Permission denied ' + f)
     print(str(time.ctime()) + '    Removed {} files'.format(n))
 
 
