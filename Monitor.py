@@ -128,12 +128,16 @@ def set_leds_by_time(t):
 #
 # Device Controllers
 #
-def set_heater_absolute(state):
-    if state != DEVICES['heater']['state']['power']:
-        for p in DEVICES['heater']['pins']:
-            GPIO.output(p, GPIO.LOW if state else GPIO.HIGH)
-        DEVICES['heater']['state']['power'] = state
-        display_status(f" Set heater to {'on' if state else 'off'}")
+def set_heater_absolute(power):
+    state = DEVICES['heater']['state']
+    pins = DEVICES['heater']['pins']
+
+    if power != state['power']:
+        for p in pins:
+            GPIO.output(p, GPIO.LOW if power else GPIO.HIGH)
+        state['power'] = power
+        state['last_change'] = dt.now()
+        display_status(f"Set heater to {'on' if power else 'off'}")
 
 
 def set_leds_absolute(brightness):
@@ -186,7 +190,7 @@ def get_pi_temp():
 
 def display_status(s):
     if verbose:
-        print(str(time.ctime()) + s)
+        print(str(time.ctime()) + ' ' + s)
 
 
 #
