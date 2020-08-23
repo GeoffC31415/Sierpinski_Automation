@@ -1,9 +1,10 @@
 from influxdb import InfluxDBClient
 import json
+from os.path import join, dirname
 
 
 def get_secrets():
-    with open('./data/secrets.json') as s:
+    with open(join(dirname(__file__), './data/secrets.json')) as s:
         secrets = json.load(s)
     return secrets
 

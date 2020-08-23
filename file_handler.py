@@ -1,6 +1,9 @@
-import os
 import time
 import glob
+
+from os import remove
+from os.path import isfile, getmtime, getsize
+
 from datetime import timedelta as td
 from datetime import datetime as dt
 
@@ -12,7 +15,7 @@ def get_mp4s():
     minage = dt.now() - td(hours=1)
     files = [
         f for f in set(glob.glob(sourcePath + '*/*.mp4'))
-        if dt.fromtimestamp(os.path.getmtime(f)) < minage
+        if dt.fromtimestamp(getmtime(f)) < minage
     ]
     return set(files)
 
@@ -26,10 +29,10 @@ def filterT(filelist, minhr, maxhr):
     intime = []
     totalsize = 0
     for f in filelist:
-        filedate = dt.fromtimestamp(os.path.getmtime(f))
+        filedate = dt.fromtimestamp(getmtime(f))
         if minhr <= filedate.hour < maxhr:
             intime.append(f)
-            totalsize += os.path.getsize(f)
+            totalsize += getsize(f)
     return set(intime), totalsize / 1024
 
 
@@ -39,10 +42,10 @@ def filterS(filelist, maxsize):
     insize = []
     totalsize = 0
     for f in filelist:
-        size = os.path.getsize(f)
+        size = getsize(f)
         if size < maxsize:
             insize.append(f)
-            totalsize += os.path.getsize(f)
+            totalsize += size
     return set(insize), totalsize / 1024
 
 
@@ -52,10 +55,10 @@ def filterA(filelist, agelimit):
     oldfiles = []
     totalsize = 0
     for f in filelist:
-        filedate = dt.fromtimestamp(os.path.getmtime(f))
+        filedate = dt.fromtimestamp(getmtime(f))
         if filedate < (dt.now() - agelimit):
             oldfiles.append(f)
-            totalsize += os.path.getsize(f)
+            totalsize += getsize(f)
     return set(oldfiles), totalsize / 1024
 
 
@@ -65,9 +68,9 @@ def get_total_size(startdate, enddate):
     filelist = get_mp4s()
     totalsize = 0
     for f in filelist:
-        filedate = dt.fromtimestamp(os.path.getmtime(f))
+        filedate = dt.fromtimestamp(getmtime(f))
         if (filedate > startdate) and (filedate < enddate):
-            totalsize += os.path.getsize(f)
+            totalsize += getsize(f)
     return totalsize
 
 
@@ -75,9 +78,9 @@ def removeFiles(filelist):
     n = 0
     for f in filelist:
         try:
-            os.remove(f)
-            if os.isfile(f + '.thumb'):
-                os.remove(f + '.thumb')
+            remove(f)
+            if isfile(f + '.thumb'):
+                remove(f + '.thumb')
             n += 1
         except FileNotFoundError:
             print(str(time.ctime()) + '        Could not remove file ' + f)

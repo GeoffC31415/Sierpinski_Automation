@@ -1,4 +1,3 @@
-import os
 import time
 import json
 import math
@@ -6,6 +5,9 @@ import numpy as np
 
 import RPi.GPIO as GPIO
 import wiringpi
+
+from os import popen
+from os.path import join, dirname
 
 from datetime import datetime as dt
 from datetime import timedelta as td
@@ -53,7 +55,7 @@ thermistor_volts = []
 # Initialisation
 #
 def init_calibration():
-    with open('./data/thermistor_calibration_alt.json', 'r') as f:
+    with open(join(dirname(__file__), './data/thermistors.json'), 'r') as f:
         data = json.load(f)
 
     data['temps'] = np.array(data['temps'])
@@ -129,7 +131,7 @@ def set_leds_by_time(t):
 def set_heater_absolute(state):
     if state != DEVICES['heater']['state']['power']:
         for p in DEVICES['heater']['pins']:
-            GPIO.output(p, GPIO.HIGH if state else GPIO.LOW)
+            GPIO.output(p, GPIO.LOW if state else GPIO.HIGH)
         DEVICES['heater']['state']['power'] = state
         display_status(f" Set heater to {'on' if state else 'off'}")
 
@@ -178,7 +180,7 @@ def take_readings(N):
 
 
 def get_pi_temp():
-    temp = os.popen("vcgencmd measure_temp").readline()
+    temp = popen("vcgencmd measure_temp").readline()
     return float(temp[5:-3])
 
 
