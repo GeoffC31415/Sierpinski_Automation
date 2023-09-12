@@ -1,14 +1,14 @@
 import time
 import json
 import math
-import numpy as np
-
-import RPi.GPIO as GPIO
+import traceback
 import wiringpi
+
+import numpy as np
+import RPi.GPIO as GPIO
 
 from os import popen
 from os.path import join, dirname
-
 from datetime import datetime as dt
 from datetime import timedelta as td
 from ADCPi import ADCPi
@@ -31,7 +31,7 @@ DEVICES = {
             'time': 180
         },
         'daycycle': {
-            'avgT': 27,
+            'avgT': 24,
             'deltaT': 2,
             'coldest_hour': 2
         }
@@ -45,15 +45,12 @@ DEVICES = {
         'adc': ADCPi(0x68, 0x69, 18)
     }
 }
-runNo = dt.now().strftime("%Y%m%d%H%M")
-verbose = False
+runNo = 'v1'
+verbose = True
 cycle_log = []
 thermistor_volts = []
 
 
-#
-# Initialisation
-#
 def init_calibration():
     with open(join(dirname(__file__), './data/thermistors.json'), 'r') as f:
         data = json.load(f)
@@ -85,8 +82,11 @@ def set_heater_by_time(t):
 
     # Calc intermediate values
     target_temp = calc_target_temp(t, **heater['daycycle'])
-    # avg_temp = (sum(readings) / len(readings))
-    median_temp = sum(sorted(readings)[1:3]) / 2
+    
+    # If a reading is exactly 13 degrees, the sensor has been ripped off the wall by pinpin
+    useful_readings = [r for r in readings if r != 13]
+    median_temp = calculate_median(useful_readings)
+
     power = median_temp < target_temp
     delta_t = (dt.now() - heater['state']['last_change']).total_seconds()
 
@@ -104,8 +104,8 @@ def set_heater_by_time(t):
     # Log values
     log_temps(readings, median_temp)
     log_fields({
-        'heater_state': heater['state']['power'],
-        'target_temp': target_temp,
+        'heater_state': heater['state']['power'], 
+        'target_temp': target_temp, 
         'temp_pi': get_pi_temp()
     })
 
@@ -171,6 +171,8 @@ def calc_target_temp(t, avgT, deltaT, coldest_hour):
 
 
 def take_readings(N):
+    """N is the number of readings to take. 
+    Each reading is a list of four numbers from the four sensors."""
     r = [0, 0, 0, 0]
     readings = []
     adc = DEVICES['thermistors']['adc']
@@ -181,6 +183,20 @@ def take_readings(N):
         readings.append(r)
         time.sleep(1)
     return readings
+
+
+def calculate_median(lst):
+    sorted_lst = sorted(lst)
+    n = len(sorted_lst)
+    
+    if n % 2 == 0:
+        middle1 = sorted_lst[n // 2 - 1]
+        middle2 = sorted_lst[n // 2]
+        median = (middle1 + middle2) / 2
+    else:
+        median = sorted_lst[n // 2]
+    
+    return median
 
 
 def get_pi_temp():
@@ -196,20 +212,14 @@ def display_status(s):
 #
 # Logging
 #
-def log_temps(r, repr_temp):
-    temps = {'temp' + str(i): r[i] for i in range(4)}
+def log_temps(readings, repr_temp):
+    temps = {'temp' + str(i): r for i,r in enumerate(readings)}
     temps['temp_avg'] = repr_temp
     log_fields(temps)
 
 
 def log_fields(fields):
-    cycle_log.append({
-        'measurement': 'vivarium2',
-        'tags': {
-            'run': runNo
-        },
-        'fields': fields
-    })
+    cycle_log.append({'measurement': 'vivarium2', 'tags': {'run': runNo}, 'fields': fields})
 
 
 def write_points(data):
@@ -217,7 +227,7 @@ def write_points(data):
     if influx_handler.write(data):
         cycle_log = []
     else:
-        display_status('Problem  writing sensor data to InfluxDB')
+        display_status('Problem writing sensor data to InfluxDB')
 
 
 #
@@ -236,12 +246,14 @@ def main():
             set_heater_by_time(t)
             set_leds_by_time(t)
 
-            write_points(cycle_log)
+            if len(cycle_log) > 0:
+                write_points(cycle_log)
             file_handler.cleanVideos(minhr=6, maxhr=20, maxsize=3e6)
 
             time.sleep(10)
     except Exception as e:
         print(str(e))
+        traceback.print_exc()
     finally:
         GPIO.cleanup()
 
