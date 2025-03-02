@@ -31,15 +31,15 @@ DEVICES = {
             'time': 180
         },
         'daycycle': {
-            'avgT': 24,
+            'avgT': 26,
             'deltaT': 2,
             'coldest_hour': 2
         }
     },
     'leds': {
         'state': None,
-        'sunrise': td(hours=7),
-        'sunset': td(hours=21)
+        'sunrise': td(hours=6),
+        'sunset': td(hours=20)
     },
     'thermistors': {
         'adc': ADCPi(0x68, 0x69, 18)
@@ -98,7 +98,6 @@ def set_heater_by_time(t):
 
     # Set heater state if required
     if not (in_temp_deadzone or in_time_deadzone) or init_heater:
-        display_status(f'Setting heater to {power}')
         set_heater_absolute(power)
 
     # Log values
@@ -130,14 +129,13 @@ def set_leds_by_time(t):
 #
 def set_heater_absolute(power):
     state = DEVICES['heater']['state']
-    pins = DEVICES['heater']['pins']
 
     if power != state['power']:
-        for p in pins:
+        display_status(f'Setting heater to {power}')
+        for p in DEVICES['heater']['pins']:
             GPIO.output(p, GPIO.LOW if power else GPIO.HIGH)
         state['power'] = power
         state['last_change'] = dt.now()
-        display_status(f"Set heater to {'on' if power else 'off'}")
 
 
 def set_leds_absolute(brightness):
@@ -179,7 +177,6 @@ def take_readings(N):
     for n in range(N):
         for i in range(4):
             r[i] = volts_to_centigrade(adc.read_voltage(i + 1), i)
-        display_status('Readings: {:>8.4f}{:>8.4f}{:>8.4f}{:>8.4f}'.format(*r))
         readings.append(r)
         time.sleep(1)
     return readings
