@@ -2,7 +2,7 @@ import sys
 import time
 import json
 import logging
-from ADCPI import ADCPi
+from ADCPi import ADCPi
 
 import numpy as np
 
