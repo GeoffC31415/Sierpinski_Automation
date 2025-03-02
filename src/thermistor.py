@@ -48,7 +48,7 @@ class ThermistorManager:
             Dictionary with calibration data
         """
         try:
-            calibration_path = join(dirname(__file__), calibration_file)
+            calibration_path = join(dirname(dirname(__file__)), calibration_file)
             with open(calibration_path, 'r') as f:
                 data = json.load(f)
 
