@@ -1,14 +1,9 @@
-import sys
 import logging
 import influx_handler
 
-from os.path import dirname
 from typing import Any, Dict, List
 
-PROJ_ROOT = dirname(dirname(dirname(dirname(__file__))))
-sys.path.append(PROJ_ROOT)
-
-from config import Config
+from src.config import Config
 
 logger = logging.getLogger('vivarium')
 

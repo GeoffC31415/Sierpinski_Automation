@@ -17,7 +17,7 @@ from os import popen
 from os.path import dirname, join
 from typing import Optional
 
-PROJ_ROOT = dirname(dirname(dirname(dirname(__file__))))
+PROJ_ROOT = dirname(__file__)
 sys.path.append(PROJ_ROOT)
 
 from src.config import Config
