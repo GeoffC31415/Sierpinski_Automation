@@ -77,7 +77,7 @@ class Heater:
                 'temperatures': readings,
                 'median_temp': None,
                 'target_temp': target_temp,
-                'heater_state': self.state.value
+                'heater_state': float(self.state.value)
             }
         
         median_temp = thermistor_manager.calculate_median(valid_readings)
@@ -97,7 +97,7 @@ class Heater:
             'temperatures': readings,
             'median_temp': median_temp,
             'target_temp': target_temp,
-            'heater_state': self.state.value
+            'heater_state': float(self.state.value)
         }
     
     def _calculate_target_temp(self, time: datetime) -> float:
