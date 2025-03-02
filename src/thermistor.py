@@ -2,14 +2,14 @@ import sys
 import time
 import json
 import logging
+from ADCPI import ADCPi
 
 import numpy as np
 
 from os.path import dirname, join
 from typing import Dict, List
 
-
-from config import Config
+from src.config import Config
 
 logger = logging.getLogger('vivarium')
 
