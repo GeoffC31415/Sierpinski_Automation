@@ -6,10 +6,12 @@ import logging
 import numpy as np
 
 from os.path import dirname, join
-from ADCPi import ADCPi
+from typing import Dict, List
+
+PROJ_ROOT = dirname(dirname(dirname(dirname(__file__))))
+sys.path.append(PROJ_ROOT)
 
 from config import Config
-from typing import Dict, List
 
 logger = logging.getLogger('vivarium')
 

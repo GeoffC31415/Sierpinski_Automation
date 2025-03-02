@@ -17,6 +17,9 @@ from os import popen
 from os.path import dirname, join
 from typing import Optional
 
+PROJ_ROOT = dirname(dirname(dirname(dirname(__file__))))
+sys.path.append(PROJ_ROOT)
+
 from src.config import Config
 from src.thermistor import ThermistorManager
 from src.heater import Heater

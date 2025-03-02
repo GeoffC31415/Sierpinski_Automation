@@ -1,9 +1,14 @@
+import sys
 import math
 import logging
 import wiringpi
 
 from datetime import datetime, timedelta
 from typing import Any, Dict
+from os.path import dirname
+
+PROJ_ROOT = dirname(dirname(dirname(dirname(__file__))))
+sys.path.append(PROJ_ROOT)
 
 from config import Config
 

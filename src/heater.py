@@ -1,9 +1,14 @@
+import sys
 import math
 import logging
 import RPi.GPIO as GPIO
 
 from typing import Any, Dict
 from datetime import datetime
+from os.path import dirname
+
+PROJ_ROOT = dirname(dirname(dirname(dirname(__file__))))
+sys.path.append(PROJ_ROOT)
 
 from config import Config
 from src.config import DeviceState
